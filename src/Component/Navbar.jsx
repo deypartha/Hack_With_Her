@@ -2,6 +2,7 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+
 export default function CustomNavbar() {
   const location = useLocation(); // Get the current page path
 
@@ -39,9 +40,14 @@ export default function CustomNavbar() {
                 Contact Us
               </Nav.Link>
 
-              <Nav.Link as={Link} to="/map" className={location.pathname === "/map" ? "active" : ""}>
-                Map
+              <Nav.Link
+                as={Link}
+                to="/map"
+                className={location.pathname.startsWith("/map") ? "active" : ""}
+              >
+                Live Location
               </Nav.Link>
+
 
               <Nav.Link as={Link} to="/login" id="login" className={location.pathname === "/login" ? "active" : ""}>
                 Login

@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 import "aos/dist/aos.css";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -8,6 +8,9 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 import { navbar } from "@material-tailwind/react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link } from "react-router-dom";
+import { Button, Modal } from "react-bootstrap";
+import { Container, Row, Col, Card, Form } from "react-bootstrap";
+
 
 
 
@@ -16,57 +19,6 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 gsap.registerPlugin(ScrollTrigger);
 
 
-const CrimeChart = () => {
-  const data = {
-    labels: [
-      "Cruelty by Husband/Relatives",
-      "Assault on Women",
-      "Kidnapping & Abduction",
-      "Rape",
-      "Dowry Deaths",
-      "Other Crimes",
-    ],
-    datasets: [
-      {
-        label: "Cases Reported (2022)",
-        data: [134983, 105034, 93787, 31516, 6589, 73347], // NCRB Statistics
-        backgroundColor: [
-          "#42A5F5", // Blue
-          "#5C6BC0", // Purple
-          "#26C6DA", // Cyan
-          "#FF7043", // Orange
-          "#D32F2F", // Red
-          "#7E57C2", // Deep Purple
-        ],
-        borderColor: "#333",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-
-  const options = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: true,
-        text: "Crimes Against Women in India (2022 - NCRB Data)",
-        font: { size: 18 },
-      },
-      legend: { display: false },
-    },
-    scales: {
-      y: { beginAtZero: true },
-    },
-  };
-
-  return (
-    <div className="container my-5" id="crime-chart">
-      <h2 className="text-center mb-4">Crime Statistics (India 2022)</h2>
-      <Bar data={data} options={options} />
-    </div>
-  );
-};
 
 const images = [
   "https://www.msijanakpuri.com/wp-content/uploads/2019/06/stop-violence-against-women-.jpg",
@@ -104,9 +56,90 @@ const resources = [
   },
 ];
 
+const helplines = [
+  { label: "Police", number: "100" },
+  { label: "Child Helpline", number: "1098" },
+  { label: "Women Helpline", number: "1091" },
+  { label: "Fire", number: "101" },
+  { label: "Senior Citizen", number: "1091" },
+  { label: "Ambulance", number: "108" },
+];
+
 
 
 const Home = () => {
+  const [selectedYear, setSelectedYear] = useState("2022");
+  const [totalCases, setTotalCases] = useState(0);
+  const [highestState, setHighestState] = useState("Loading...");
+  const [yoyChange, setYoyChange] = useState("Loading...");
+
+  const data = {
+    labels: [
+      "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+      "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya",
+      "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+      "Uttarakhand", "West Bengal"
+    ],
+    datasets: [
+      {
+        label: "2020",
+        data: [1899, 30, 3530, 1512, 297, 40, 1283, 656, 98, 1204, 10741, 426, 699, 5496, 79, 142, 13, 8, 1931, 378, 1354, 0, 782, 5024, 34, 11097, 243, 712],
+        backgroundColor: "rgba(63, 81, 181, 0.6)",
+        borderColor: "rgba(63, 81, 181, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "2021",
+        data: [1875, 47, 4846, 1413, 352, 36, 1536, 622, 70, 953, 8136, 626, 589, 5562, 67, 107, 30, 8, 2037, 551, 1504, 0, 1076, 10303, 24, 8829, 718, 513],
+        backgroundColor: "rgba(156, 39, 176, 0.6)",
+        borderColor: "rgba(156, 39, 176, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "2022",
+        data: [2341, 14, 1733, 1621, 439, 90, 1417, 681, 77, 967, 12556, 773, 826, 8249, 18, 75, 1, 4, 1983, 697, 1833, 26, 2082, 15297, 30, 10117, 559, 401],
+        backgroundColor: "rgba(233, 30, 99, 0.6)",
+        borderColor: "rgba(233, 30, 99, 1)",
+        borderWidth: 1,
+      }
+    ]
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: "Number of Cases" } },
+      x: { title: { display: true, text: "States/UTs" } }
+    },
+    plugins: {
+      legend: { position: "top" },
+      tooltip: {
+        callbacks: {
+          label: (tooltipItem) => `${tooltipItem.dataset.label}: ${tooltipItem.raw.toLocaleString()} cases`
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const datasetIndex = parseInt(selectedYear) - 2020;
+    const selectedData = data.datasets[datasetIndex]?.data || [];
+    const total = selectedData.reduce((a, b) => a + b, 0);
+    setTotalCases(total.toLocaleString());
+
+    const maxValue = Math.max(...selectedData);
+    const maxIndex = selectedData.indexOf(maxValue);
+    setHighestState(data.labels[maxIndex]);
+
+    if (datasetIndex > 0) {
+      const previousData = data.datasets[datasetIndex - 1].data;
+      const totalPrevious = previousData.reduce((a, b) => a + b, 0);
+      setYoyChange(`${(((total - totalPrevious) / totalPrevious) * 100).toFixed(1)}%`);
+    } else {
+      setYoyChange("N/A");
+    }
+  }, [selectedYear]);
   useEffect(() => {
     gsap.utils.toArray(".animate-section").forEach((section) => {
       gsap.from(section, {
@@ -139,7 +172,7 @@ const Home = () => {
         <h2 className="fw-bold mb-4" style={{ fontSize: "50px", color: "rgb(169 54 15)"}}>RESOURCES FOR WOMEN'S SAFETY</h2>
         <div className="row justify-content-center">
           {resources.map((resource, index) => (
-            <div key={index} className="col-md-4 col-lg-3 mb-4">
+            <div key={index} className="col-md-4 col-lg-4 mb-4">
               <div className="card shadow-lg border-0 p-4 text-center">
                 <h5 className="fw-bold">{resource.title}</h5>
                 <p className="text-muted">{resource.description}</p>
@@ -190,8 +223,41 @@ const Home = () => {
       <h2 className="text-center mb-4">Forms of Violence Against Women</h2>
         </div>
         </div>
+
+        <Container className="py-4">
+      <h1 className="text-center text-primary">Crime Statistics in India (2020-2022)</h1>
+      <h2 className="text-center text-secondary">State-wise Analysis</h2>
+      <Row className="justify-content-center mt-4">
+        <Col md={10} className="bg-white p-4 rounded shadow">
+          <div style={{ height: "70vh" }}>
+            <Bar data={data} options={options} />
+          </div>
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col md={4}>
+          <Card className="text-center p-3 shadow">
+            <h3>Total Cases ({selectedYear})</h3>
+            <div className="h4 text-primary">{totalCases}</div>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="text-center p-3 shadow">
+            <h3>Highest Reporting State</h3>
+            <div className="h4 text-danger">{highestState}</div>
+          </Card>
+        </Col>
+        <Col md={4}>
+          <Card className="text-center p-3 shadow">
+            <h3>Year-over-Year Change</h3>
+            <div className="h4 text-success">{yoyChange}</div>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
+ 
       </section>
-      <CrimeChart />
 
       <section>
         <div className="container-fluid my-5" style={{
@@ -226,14 +292,20 @@ const Home = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-primary text-white text-center py-5">
-        <h2 className="fw-bold">Join Our Community</h2>
-        <p>Sign up for workshops, safety training, and support groups.</p>
-        <a href="#" className="btn btn-light">
-          <Link to="/login" className="btn btn-info text-white">
-            Sign Up Now
-          </Link>
-        </a>
+      <section className="text-white text-center py-5">
+      <Container className="py-4">
+        <h1>Emergency Contacts </h1>
+      <Row className="py-4">
+        {helplines.map((help, index) => (
+          <Col key={index} md={2} className="mb-3">
+            <Card className="text-center p-3">
+              <h6>{help.label}</h6>
+              <h4>{help.number}</h4>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </Container>
       </section>
 
       <footer className="bg-dark text-light py-4 mt-5">

@@ -7,6 +7,10 @@ import Home from "./Component/Home";
 import Story from "./Component/Story";
 import About from "./Component/About";
 import AskQuestion from "./Component/Ask";  
+import LiveLocation from "./Component/LiveLocation";
+// import LiveLocationSender from "./Component/LiveLocationSender";
+// import LiveLocationTracker from "./Component/LiveLocationTracker";
+
 
 const App = () => {
   useEffect(() => {
@@ -27,6 +31,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/stories" element={<Story />} />
         <Route path="/about" element={<About />}></Route>
+        <Route path="/map" element={<LiveLocation/>}></Route>
       </Routes>
       <AskQuestion />
     </Router>
